@@ -3,8 +3,8 @@ const authController = require("../controllers")();
 const { vaildateSignup, vaildateUpdateUserData } = require("../validations");
 const alreadyLoginnedMiddleware = require("../../../middlewares/alreadyLoginnedMiddleware");
 const authorizeAdminToken = require("../../../middlewares/adminAuthorizationMiddleware");
-const authorizeUser = require("../../../middlewares/UserAthorizationMiddleware");
 const checkIfActiveUser = require("../../../middlewares/checkIfActiveMiddleware");
+const authorizeUserActions = require("../../../middlewares/usersActionsAuthorization");
 
 authRouter = express.Router();
 
@@ -26,13 +26,19 @@ authRouter.post(
 authRouter.get("/", authorizeAdminToken, authController.get);
 
 //update user's data
-authRouter.patch("/:id", vaildateUpdateUserData, authController.update);
+authRouter.patch(
+  "/:id",
+  checkIfActiveUser,
+  authorizeUserActions,
+  vaildateUpdateUserData,
+  authController.update
+);
 
 //enroll in course
 authRouter.post(
   "/:id/courses/:cid",
   checkIfActiveUser,
-  authorizeUser,
+  authorizeUserActions,
   vaildateUpdateUserData,
   authController.enroll
 );
@@ -41,7 +47,7 @@ authRouter.post(
 authRouter.delete(
   "/:id/courses/:cid",
   checkIfActiveUser,
-  authorizeUser,
+  authorizeUserActions,
   vaildateUpdateUserData,
   authController.leave
 );
@@ -50,7 +56,7 @@ authRouter.delete(
 authRouter.get(
   "/:id/courses",
   checkIfActiveUser,
-  authorizeUser,
+  authorizeUserActions,
   authController.getRegisteredCourses
 );
 
@@ -58,7 +64,7 @@ authRouter.get(
 authRouter.get(
   "/:id/finished",
   checkIfActiveUser,
-  authorizeUser,
+  authorizeUserActions,
   authController.getFinishedCourses
 );
 
@@ -66,7 +72,7 @@ authRouter.get(
 authRouter.patch(
   "/:id/courses/:cid",
   checkIfActiveUser,
-  authorizeUser,
+  authorizeUserActions,
   vaildateUpdateUserData,
   authController.finish
 );

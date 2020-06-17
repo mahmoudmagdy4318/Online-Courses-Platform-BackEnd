@@ -1,6 +1,5 @@
 const UserModel = require("../components/Auth/models/UserModel");
 const checkIfActiveUser = async function (req, res, next) {
-  console.log(UserModel);
   if (!req.headers.authorization) {
     const { username } = req.body;
     const user = await UserModel.findOne({ username }, "active");
