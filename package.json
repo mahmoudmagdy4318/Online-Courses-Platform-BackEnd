@@ -4,7 +4,7 @@
   "description": "platform where users can enroll and watch online courses managed by admins",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "node app.js",
     "debug": "nodemon --inspect app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "nodemon --inspect ."
