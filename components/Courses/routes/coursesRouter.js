@@ -1,6 +1,6 @@
 const express = require("express");
 const coursesController = require("../controllers");
-const validateCourse = require("../validations");
+const { vaildateCourse, vaildateUpdateCourseData } = require("../validations");
 const authorizeAdminToken = require("../../../middlewares/adminAuthorizationMiddleware");
 
 coursesRouter = express.Router();
@@ -10,7 +10,7 @@ coursesRouter.get("/", coursesController.list);
 coursesRouter.post(
   "/",
   authorizeAdminToken,
-  validateCourse,
+  vaildateCourse,
   coursesController.post
 );
 //get a course
@@ -19,7 +19,7 @@ coursesRouter.get("/:id", coursesController.show);
 coursesRouter.patch(
   "/:id",
   authorizeAdminToken,
-  validateCourse,
+  vaildateUpdateCourseData,
   coursesController.update
 );
 //delete a course

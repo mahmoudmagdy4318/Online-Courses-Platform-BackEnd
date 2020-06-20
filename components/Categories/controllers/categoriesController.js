@@ -5,10 +5,11 @@ module.exports = function categoryController() {
     const { page } = req.query;
     const categories = await CategoryModel.find()
       .populate("courses")
-      .limit(10)
-      .skip((page - 1) * 10)
+      .limit(6)
+      .skip((page - 1) * 6)
       .exec();
-    res.json({ categories });
+    const lastPage = await CategoryModel.count();
+    res.json({ categories, lastPage: lastPage / 6 });
   };
   //function to add a new category
   const post = async (req, res, next) => {

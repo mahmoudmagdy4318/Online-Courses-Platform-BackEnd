@@ -1,5 +1,3 @@
-const UserModel = require("../components/Auth/models/UserModel");
-
 const authorizeUserActions = async function (req, res, next) {
   const { id } = req.params;
   const { currentUser } = req;

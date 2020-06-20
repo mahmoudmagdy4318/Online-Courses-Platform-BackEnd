@@ -13,7 +13,7 @@ module.exports = function authController() {
       const newUser = await user.save();
       const token = await newUser.generateToken();
       if (!token) throw new Error("An error occured");
-      res.json({ newUser, token });
+      res.json({ token });
     } catch (err) {
       throw new Error("Signup Error, This user already exits");
     }
@@ -23,14 +23,11 @@ module.exports = function authController() {
     const { username, password } = req.body;
     const user = await getUser(username);
     if (user) {
-      try {
-        await user.comparePassword(password);
-        const token = await user.generateToken();
-        if (!token) throw new Error("An error occured");
-        res.json({ user, token });
-      } catch (err) {
-        throw new Error("invalid username or password");
-      }
+      const passCmp = await user.comparePassword(password);
+      if (!passCmp) throw new Error("invalid username or password");
+      const token = await user.generateToken();
+      if (!token) throw new Error("An error occured");
+      res.json({ token });
     } else {
       throw new Error("user not found!");
     }
@@ -41,19 +38,24 @@ module.exports = function authController() {
     const { page, lt, gt, role } = req.query;
     const search = {
       ...{ role: role || "user" },
-      score: { ...(lt && { $lt: lt }), ...(gt && { $gt: gt }) },
+      score: { ...(lt && { $lt: lt }), ...{ $gt: gt || -1 } },
     };
-    const users = await UserModel.find(search)
-      .limit(10)
-      .skip((page - 1) * 10)
+    const users = await UserModel.find(
+      search,
+      "_id username email score active"
+    )
+      .limit(6)
+      .skip((page - 1) * 6)
       .exec();
-    res.json({ users });
+    const totalNumber = await UserModel.count({ role: "user" });
+
+    res.json({ users, totalNumber });
   };
   //update user's data
   const update = async (req, res, next) => {
     const { id } = req.params;
-    const user = await UserModel.findOneAndUpdate({ _id: id }, req.body);
-    res.json({ user });
+    await UserModel.findOneAndUpdate({ _id: id }, req.body);
+    res.json({ message: "updated successfully" });
   };
 
   //enroll in course
@@ -63,7 +65,7 @@ module.exports = function authController() {
       { _id: id },
       { $push: { courses: cid } }
     );
-    res.json({ user });
+    res.json({ message: "enrolled successfully" });
   };
 
   //leave a course
@@ -73,7 +75,7 @@ module.exports = function authController() {
       { _id: id },
       { $pull: { courses: cid } }
     );
-    res.json({ user });
+    res.json({ message: "cancelled successfully" });
   };
 
   //finish a course
@@ -90,7 +92,7 @@ module.exports = function authController() {
         $inc: { score: points },
       }
     );
-    res.json({ user });
+    res.json({ message: "finished successfully" });
   };
   //get user's registered courses
   const getRegisteredCourses = async (req, res, next) => {

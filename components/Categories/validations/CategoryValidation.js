@@ -11,4 +11,5 @@ const vaildateCategory = (req, res, next) => {
   }
   next();
 };
+
 module.exports = vaildateCategory;

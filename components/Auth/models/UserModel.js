@@ -20,7 +20,7 @@ const UserModel = new Schema({
   },
   password: { type: "String", required: [true, "password is required"] },
   role: { type: String, default: "user" },
-  active: { type: String, default: "active" },
+  active: { type: Boolean, default: true },
   score: { type: Number, default: 0 },
   courses: [{ type: mongoose.Schema.ObjectId, ref: "Course" }],
   finishedCourses: [{ type: mongoose.Schema.ObjectId, ref: "Course" }],
@@ -48,7 +48,10 @@ const verify = util.promisify(jwt.verify);
 UserModel.methods.generateToken = function () {
   return sign(
     {
+      _id: JSON.stringify(this._id),
       username: JSON.stringify(this.username),
+      email: JSON.stringify(this.email),
+      score: JSON.stringify(this.score),
       role: JSON.stringify(this.role),
       active: JSON.stringify(this.active),
     },
@@ -58,12 +61,14 @@ UserModel.methods.generateToken = function () {
 };
 //function to get current user loggedIn from his token
 UserModel.statics.getCurrentUserFromToken = async function (token) {
-  console.log(token);
   try {
     const payload = await verify(token, process.env.SECRET_KEY);
-    const currentUser = await this.find({ username: eval(payload.username) });
-    currentUser.role = eval(payload.role);
-    currentUser.active = eval(payload.active);
+    const currentUser = await this.find({
+      username: JSON.parse(payload.username),
+    });
+    currentUser.role = JSON.parse(payload.role);
+    currentUser._id = JSON.parse(payload._id);
+    currentUser.active = JSON.parse(payload.active);
     if (!currentUser) throw new Error("user not found!");
     currentuser = currentUser[0];
     return currentuser;

@@ -5,14 +5,15 @@ module.exports = function courseController() {
     //search with query parameters
     const { page, lt, gt } = req.query;
     const search = {
-      points: { ...(lt && { $lt: lt }), ...(gt && { $gt: gt }) },
+      points: { ...(lt && { $lt: lt }), ...{ $gt: gt || -1 } },
     };
     const courses = await CourseModel.find(search)
       .populate("categories")
-      .limit(10)
-      .skip((page - 1) * 10)
+      .limit(6)
+      .skip((page - 1) * 6)
       .exec();
-    res.json({ courses });
+    const lastPage = await CourseModel.count();
+    res.json({ courses, lastPage });
   };
   //function to add new course
   const post = async (req, res, next) => {
@@ -26,9 +27,10 @@ module.exports = function courseController() {
   //function to get an course
   const show = async (req, res, next) => {
     const { id } = req.params;
-    const course = await CourseModel.findOne({ _id: id }).populate(
-      "categories"
-    );
+    const course = await CourseModel.findOne(
+      { _id: id },
+      "name description points categories"
+    ).populate("categories");
     res.json({ course });
   };
   //function to edit an course

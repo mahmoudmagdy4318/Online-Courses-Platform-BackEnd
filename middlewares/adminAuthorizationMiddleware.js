@@ -11,6 +11,7 @@ const authorizeAdminToken = async function (req, res, next) {
       throw new Error(
         "authorization failed, You are not authorized to complete this action!"
       );
+    req.token = token;
     req.currentUser = currentUser;
     next();
   }

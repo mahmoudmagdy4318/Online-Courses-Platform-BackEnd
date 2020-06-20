@@ -22,14 +22,13 @@ const updateUserSchema = Joi.object({
 
   email: Joi.string().email({
     minDomainSegments: 2,
-    tlds: { allow: ["com", "net"] },
   }),
 
   password: Joi.string()
     .pattern(/^[a-zA-Z0-9]{3,30}$/)
     .min(6),
   score: Joi.number(),
-  active: Joi.string().valid("active", "inactive"),
+  active: Joi.boolean(),
   courses: Joi.array().items(Joi.objectId()).unique(),
   finishedCourses: Joi.array().items(Joi.objectId()).unique(),
 });
