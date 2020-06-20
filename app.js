@@ -14,7 +14,7 @@ const {
 } = require("./startups");
 
 //getting port and databaseUrl from env
-const port = process.env.PORT;
+const port = process.env.PORT || 8080;
 const databaseUrl = process.env.DATABASEURL;
 
 app.use(cors());
